@@ -72,6 +72,7 @@ echo -e "-----------------------------------------------------------------------
 JSON_EXPECTED=$WORKSPACE/tests/e2e/expected_results/tinyMediaManager/tinyMediaManager.json
 JSON_RESULT=$WORKSPACE/output/reports/gitlab_com/tinyMediaManager/tinyMediaManager/tinyMediaManager.json
 $RUN_MACARON analyze -rp https://gitlab.com/tinyMediaManager/tinyMediaManager -b main -d cca6b67a335074eca42136556f0a321f75dc4f48 --skip-deps || log_fail
+# Original commit cca6b67a335074eca42136556f0a321f75dc4f48 is a version bump after version tagged commit 4.3.11.
 
 check_or_update_expected_output $COMPARE_JSON_OUT $JSON_RESULT $JSON_EXPECTED || log_fail
 
@@ -81,6 +82,7 @@ echo -e "-----------------------------------------------------------------------
 JSON_EXPECTED=$WORKSPACE/tests/e2e/expected_results/plot-plugin/plot-plugin.json
 JSON_RESULT=$WORKSPACE/output/reports/github_com/jenkinsci/plot-plugin/plot-plugin.json
 $RUN_MACARON analyze -rp https://github.com/jenkinsci/plot-plugin -b master -d 55b059187e252b35ac0d6cb52268833ee1bb7380 --skip-deps || log_fail
+# Original commit 55b059187e252b35ac0d6cb52268833ee1bb7380 maps to version tagged commit 2.1.10.
 
 check_or_update_expected_output $COMPARE_JSON_OUT $JSON_RESULT $JSON_EXPECTED || log_fail
 
@@ -92,6 +94,7 @@ JSON_EXPECTED=$WORKSPACE/tests/e2e/expected_results/urllib3/urllib3.json
 JSON_RESULT=$WORKSPACE/output/reports/github_com/urllib3/urllib3/urllib3.json
 EXPECTATION_FILE=$WORKSPACE/tests/slsa_analyzer/provenance/expectations/cue/resources/valid_expectations/urllib3_PASS.cue
 $RUN_MACARON analyze -pe $EXPECTATION_FILE -rp https://github.com/urllib3/urllib3/urllib3 -b main -d 87a0ecee6e691fe5ff93cd000c0158deebef763b --skip-deps || log_fail
+# Original commit 87a0ecee6e691fe5ff93cd000c0158deebef763b seems to be included in version tagged commit 2.0.0a1.
 
 check_or_update_expected_output $COMPARE_JSON_OUT $JSON_RESULT $JSON_EXPECTED || log_fail
 
@@ -166,6 +169,7 @@ echo -e "-----------------------------------------------------------------------
 JSON_EXPECTED=$WORKSPACE/tests/e2e/expected_results/react-pdf/react-pdf.json
 JSON_RESULT=$WORKSPACE/output/reports/github_com/wojtekmaj/react-pdf/react-pdf.json
 $RUN_MACARON analyze -rp https://github.com/wojtekmaj/react-pdf -b main -d be18436b7be827eb993b2e1e4bd9230dd835a9a3 --skip-deps || log_fail
+# Original commit be18436b7be827eb993b2e1e4bd9230dd835a9a3 mapped seems to be included in version tagged commit 7.4.0.
 
 check_or_update_expected_output $COMPARE_JSON_OUT $JSON_RESULT $JSON_EXPECTED || log_fail
 
@@ -185,6 +189,7 @@ echo -e "-----------------------------------------------------------------------
 JSON_EXPECTED=$WORKSPACE/tests/e2e/expected_results/purl/maven/maven.json
 JSON_RESULT=$WORKSPACE/output/reports/maven/apache/maven/maven.json
 $RUN_MACARON analyze -purl pkg:maven/apache/maven -rp https://github.com/apache/maven -b master -d 6767f2500f1d005924ccff27f04350c253858a84 --skip-deps || log_fail
+# Original commit 6767f2500f1d005924ccff27f04350c253858a84 seems to be included in version tagged commit 4.0.0-alpha-1.
 
 check_or_update_expected_output $COMPARE_JSON_OUT $JSON_RESULT $JSON_EXPECTED || log_fail
 
@@ -259,7 +264,7 @@ declare -a COMPARE_FILES=(
     "slf4j.json"
 )
 
-$RUN_MACARON analyze -c $WORKSPACE/tests/e2e/configurations/micronaut_test_config.yaml --skip-deps || log_fail
+$RUN_MACARON analyze -purl pkg:maven/io.micronaut/micronaut-test-core@4.1.0 --skip-deps || log_fail
 
 for i in "${COMPARE_FILES[@]}"
 do
@@ -277,6 +282,7 @@ echo "apache/maven: Check the resolved dependency output when automatic dependen
 echo -e "----------------------------------------------------------------------------------\n"
 DEP_EXPECTED=$WORKSPACE/tests/dependency_analyzer/expected_results/skipdep_apache_maven.json
 $RUN_MACARON analyze -c $WORKSPACE/tests/dependency_analyzer/configurations/maven_config.yaml --skip-deps || log_fail
+# Cannot be replaced yet as the Repo Finder cannot find the repository for maven artifacts.
 
 check_or_update_expected_output $COMPARE_DEPS $DEP_RESULT $DEP_EXPECTED || log_fail
 
@@ -293,6 +299,7 @@ declare -a COMPARE_FILES=(
 )
 
 $RUN_MACARON analyze -c $WORKSPACE/tests/e2e/configurations/maven_config.yaml --skip-deps || log_fail
+# Cannot be replaced yet as the Repo Finder cannot find the repository for maven artifacts.
 
 for i in "${COMPARE_FILES[@]}"
 do
@@ -304,6 +311,7 @@ echo "apache/maven: Check the resolved dependency output with config for cyclone
 echo -e "----------------------------------------------------------------------------------\n"
 DEP_EXPECTED=$WORKSPACE/tests/dependency_analyzer/expected_results/cyclonedx_apache_maven.json
 $RUN_MACARON analyze -c $WORKSPACE/tests/dependency_analyzer/configurations/maven_config.yaml || log_fail
+# Cannot be replaced yet as the Repo Finder cannot find the repository for maven artifacts.
 
 check_or_update_expected_output $COMPARE_DEPS $DEP_RESULT $DEP_EXPECTED || log_fail
 
@@ -346,7 +354,8 @@ echo -e "\n---------------------------------------------------------------------
 echo "FasterXML/jackson-databind: Check the e2e output JSON file with config and no dependency analyzing."
 echo -e "----------------------------------------------------------------------------------\n"
 JSON_EXPECTED=$WORKSPACE/tests/e2e/expected_results/jackson-databind/jackson-databind.json
-$RUN_MACARON analyze -c $WORKSPACE/tests/e2e/configurations/jackson_databind_config.yaml --skip-deps || log_fail
+$RUN_MACARON analyze -purl pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.14.0-rc1 --skip-deps || log_fail
+# Original commit f0af53d085eb2aa9f7f6199846cc526068e09977 seems to be first included in version tagged commit 2.14.0-rc1.
 
 check_or_update_expected_output $COMPARE_JSON_OUT $JSON_RESULT $JSON_EXPECTED || log_fail
 
@@ -355,7 +364,7 @@ check_or_update_expected_output $COMPARE_JSON_OUT $JSON_RESULT $JSON_EXPECTED ||
 # echo -e "----------------------------------------------------------------------------------\n"
 # DEP_EXPECTED=$WORKSPACE/tests/dependency_analyzer/expected_results/cyclonedx_FasterXML_jackson-databind.json
 # DEP_RESULT=$WORKSPACE/output/reports/github_com/FasterXML/jackson-databind/dependencies.json
-# $RUN_MACARON analyze -c $WORKSPACE/tests/dependency_analyzer/configurations/jackson_databind_config.yaml || log_fail
+# $RUN_MACARON analyze -purl pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.14.0-rc1 || log_fail
 
 # check_or_update_expected_output $COMPARE_DEPS $DEP_RESULT $DEP_EXPECTED || log_fail
 
