@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from collections.abc import Sequence
 from enum import Enum
@@ -65,6 +66,21 @@ class BaseAPIClient:
             The latest release object in JSON format.
         """
         return {}
+
+    def get_all_releases(self, full_name: str) -> list:  # pylint: disable=unused-argument
+        """Return all releases for the repo.
+
+        Parameters
+        ----------
+        full_name : str
+            The full name of the repo.
+
+        Returns
+        -------
+        list
+            The releases in JSON format.
+        """
+        return []
 
     def fetch_assets(self, release: dict, ext: str = "") -> Sequence[AssetLocator]:  # pylint: disable=unused-argument
         """Return the release assets that match or empty if it doesn't exist.
@@ -530,8 +546,48 @@ class GhAPIClient(BaseAPIClient):
         logger.debug("Get the latest release for %s.", full_name)
         url = f"{GhAPIClient._REPO_END_POINT}/{full_name}/releases/latest"
         response_data = send_get_http(url, self.headers)
-
         return response_data or {}
+
+    def get_all_releases(self, full_name: str) -> list:
+        """Return all releases for the repo.
+
+        Parameters
+        ----------
+        full_name : str
+            The full name of the repo.
+
+        Returns
+        -------
+        list
+            The list of releases in JSON format.
+
+        Note that this can only return the first 1000 results at most.
+        This is not detailed in the documentation, but can be discovered when trying to retrieve more than 1000.
+        Documentation: https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#list-releases
+        """
+        logger.debug("Get all releases for %s.", full_name)
+        url = f"{GhAPIClient._REPO_END_POINT}/{full_name}/releases"
+        page = 0
+        releases = []
+        while True:
+            response = send_get_http_raw(f"{url}?page={page}", self.headers)
+            if not response:
+                break
+
+            try:
+                release_data = json.loads(response.text)
+            except ValueError as error:
+                logger.debug("Failed to parse response data: %s", error)
+                return []
+
+            for entry in release_data:
+                releases.append(entry)
+
+            if not response.links:
+                break
+            page = page + 1
+
+        return releases
 
     def fetch_assets(self, release: dict, ext: str = "") -> Sequence[AssetLocator]:
         """Return the release assets that match or empty if it doesn't exist.
